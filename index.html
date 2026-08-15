@@ -1,1 +1,1189 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0; url=mollier_diagram.html"><title>Mollier Diagramm</title></head><body><a href="mollier_diagram.html">Zum Mollier-Diagramm</a></body></html>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mollier h-x Diagramm</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    background: #f5f4f0;
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 {
+    font-size: 1.25rem;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    text-align: center;
+    margin-bottom: 4px;
+    border-bottom: 1.5px solid #1a1a1a;
+    padding-bottom: 6px;
+    width: 100%;
+    max-width: 1160px;
+  }
+  .subtitle {
+    font-size: 0.82rem;
+    color: #555;
+    text-align: center;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  /* ── VIEW TOGGLE ─────────────────────────────── */
+  .view-toggle {
+    display: flex;
+    gap: 0;
+    margin-bottom: 16px;
+    border: 1.5px solid #1a1a1a;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    font-size: 0.82rem;
+  }
+  .view-toggle button {
+    padding: 6px 20px;
+    border: none;
+    cursor: pointer;
+    background: #f5f4f0;
+    color: #555;
+    letter-spacing: 0.05em;
+    transition: background 0.15s, color 0.15s;
+  }
+  .view-toggle button.active {
+    background: #1a1a1a;
+    color: #fff;
+  }
+  .view-toggle button:not(:last-child) {
+    border-right: 1.5px solid #1a1a1a;
+  }
+
+  .layout {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+    max-width: 1160px;
+    align-items: flex-start;
+  }
+  /* INPUT PANEL */
+  .panel {
+    background: #fff;
+    border: 1px solid #bbb;
+    padding: 16px 14px;
+    min-width: 255px;
+    max-width: 290px;
+    flex-shrink: 0;
+  }
+  .panel h2 {
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
+  .point-row {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #e0e0e0;
+  }
+  .point-row:last-of-type { border-bottom: none; }
+  .point-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  .color-swatch {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 1px solid #666;
+    flex-shrink: 0;
+  }
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 8px;
+  }
+  .input-group label {
+    display: block;
+    font-size: 0.72rem;
+    color: #555;
+    margin-bottom: 2px;
+    font-family: Arial, sans-serif;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 4px 6px;
+    font-size: 0.82rem;
+    border: 1px solid #aaa;
+    background: #fafafa;
+    font-family: 'Courier New', monospace;
+    text-align: right;
+  }
+  .input-group input:focus { outline: none; border-color: #333; background: #fff; }
+
+  .btn-calc {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 8px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 0.84rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .btn-calc:hover { background: #444; }
+
+  .pressure-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    font-family: Arial, sans-serif;
+    font-size: 0.78rem;
+  }
+  .pressure-row label { flex: 1; }
+  .pressure-row input {
+    width: 78px;
+    padding: 3px 6px;
+    font-size: 0.82rem;
+    border: 1px solid #aaa;
+    font-family: 'Courier New', monospace;
+    text-align: right;
+  }
+
+  /* CANVAS */
+  .chart-wrap {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #bbb;
+    padding: 10px;
+    min-width: 0;
+    overflow: hidden;
+  }
+  canvas { display: block; max-width: 100%; }
+
+  /* LEGEND TABLE */
+  .legend-table {
+    margin-top: 12px;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.76rem;
+    font-family: Arial, sans-serif;
+  }
+  .legend-table th {
+    border-bottom: 1.5px solid #1a1a1a;
+    border-top: 1.5px solid #1a1a1a;
+    padding: 3px 6px;
+    text-align: center;
+    font-weight: bold;
+    background: #f5f4f0;
+    white-space: nowrap;
+  }
+  .legend-table td {
+    padding: 3px 6px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.74rem;
+  }
+  .legend-table td.lbl { font-family: Arial, sans-serif; font-weight: bold; }
+  .footnote {
+    font-size: 0.68rem;
+    color: #777;
+    font-style: italic;
+    font-family: Arial, sans-serif;
+    margin-top: 6px;
+  }
+  .mode-hint {
+    font-size: 0.72rem;
+    color: #777;
+    font-family: Arial, sans-serif;
+    font-style: italic;
+    margin-top: 6px;
+    padding: 5px 6px;
+    background: #f5f4f0;
+    border-left: 2px solid #aaa;
+  }
+
+  /* ══ EINFACHE ANSICHT ═══════════════════════════════════════════════ */
+  .sfield {
+    margin-bottom: 10px;
+    padding: 8px 9px;
+    border: 1px solid #ccc;
+    background: #fcfcfa;
+    transition: border-color .15s, background .15s;
+  }
+  .sfield.held     { border-color: #1a1a1a; background: #fff; }
+  .sfield.computed { border-color: #c9d6e0; background: #f2f6f9; }
+
+  .sfield-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .sfield-name {
+    font-size: 0.8rem;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+  }
+  .sfield-name .sym { font-family: 'Times New Roman', serif; font-style: italic; font-size: 0.95rem; }
+  .badge {
+    font-family: Arial, sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+  .badge.fix  { color: #1a1a1a; background: #ececec; }
+  .badge.calc { color: #3d6f8e; background: #e4eef4; }
+
+  .sfield-body { display: flex; align-items: center; gap: 6px; }
+  .sfield-body input {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 7px;
+    font-size: 1rem;
+    border: 1px solid #aaa;
+    background: #fff;
+    font-family: 'Courier New', monospace;
+    text-align: right;
+  }
+  .sfield-body input:focus { outline: none; border-color: #1a1a1a; }
+  .sfield.computed input {
+    background: #f2f6f9;
+    border-color: #c9d6e0;
+    color: #24506b;
+    font-weight: bold;
+  }
+  .sfield-body .unit {
+    font-family: Arial, sans-serif;
+    font-size: 0.74rem;
+    color: #555;
+    min-width: 34px;
+  }
+  .sfield-body select {
+    font-family: Arial, sans-serif;
+    font-size: 0.7rem;
+    padding: 3px 2px;
+    border: 1px solid #aaa;
+    background: #fff;
+    max-width: 108px;
+  }
+
+  .derived {
+    margin-top: 12px;
+    border-top: 1px solid #ccc;
+    padding-top: 9px;
+    font-family: Arial, sans-serif;
+    font-size: 0.74rem;
+  }
+  .derived div {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    color: #444;
+  }
+  .derived b { font-family: 'Courier New', monospace; font-weight: normal; color: #1a1a1a; }
+
+  .warn {
+    margin-top: 10px;
+    padding: 6px 8px;
+    font-family: Arial, sans-serif;
+    font-size: 0.72rem;
+    border-left: 3px solid #b3402f;
+    background: #fbeeec;
+    color: #8c2f21;
+  }
+  .warn.hidden { display: none; }
+
+  .btn-reset {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 6px;
+    background: #fff;
+    color: #444;
+    border: 1px solid #aaa;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+  }
+  .btn-reset:hover { background: #f0f0ee; }
+
+  .hidden { display: none; }
+
+  @media (max-width: 820px) {
+    .layout { flex-direction: column; }
+    .panel { max-width: 100%; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<h1 id="main-title">Mollier h-x Diagramm — Feuchte Luft</h1>
+<p class="subtitle" id="main-sub">Normaldruck p = 101 325 Pa &nbsp;|&nbsp; Darstellung nach Mollier (1923)</p>
+
+<div class="view-toggle">
+  <button class="active" onclick="setView('einfach')" id="btn-einfach">Einfach</button>
+  <button onclick="setView('tx')" id="btn-tx">T-x Diagramm</button>
+  <button onclick="setView('hx')" id="btn-hx">h-x Diagramm (Mollier)</button>
+</div>
+
+<div class="layout">
+
+  <!-- ══ PANEL: EINFACH ═══════════════════════════════════════════════ -->
+  <div class="panel" id="simple-panel">
+    <h2>Ein Punkt</h2>
+
+    <div class="pressure-row">
+      <label>Luftdruck p [Pa]</label>
+      <input type="number" id="s-pressure" value="101325" step="100">
+    </div>
+
+    <!-- Temperatur -->
+    <div class="sfield" id="f-T">
+      <div class="sfield-head">
+        <span class="sfield-name">Temperatur <span class="sym">T</span></span>
+        <span class="badge" id="b-T">fix</span>
+      </div>
+      <div class="sfield-body">
+        <input type="number" id="i-T" step="0.1" value="20">
+        <span class="unit">°C</span>
+      </div>
+    </div>
+
+    <!-- Absolutfeuchte -->
+    <div class="sfield" id="f-AH">
+      <div class="sfield-head">
+        <span class="sfield-name">Absolutfeuchte</span>
+        <span class="badge" id="b-AH">fix</span>
+      </div>
+      <div class="sfield-body">
+        <input type="number" id="i-AH" step="0.01" value="7.26">
+        <select id="ah-unit">
+          <option value="gkg">g/kg tr. Luft (x)</option>
+          <option value="gm3">g/m³ (ρ&#8348;)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Relative Feuchte -->
+    <div class="sfield" id="f-RH">
+      <div class="sfield-head">
+        <span class="sfield-name">Rel. Feuchte <span class="sym">&#966;</span></span>
+        <span class="badge" id="b-RH">berechnet</span>
+      </div>
+      <div class="sfield-body">
+        <input type="number" id="i-RH" step="0.1" value="50">
+        <span class="unit">%</span>
+      </div>
+    </div>
+
+    <div class="warn hidden" id="s-warn"></div>
+
+    <div class="derived">
+      <div><span>Taupunkt <i>T</i>&#8348;</span><b id="d-td">–</b></div>
+      <div><span>Feuchtkugel <i>T</i>&#8324;&#8341;</span><b id="d-tw">–</b></div>
+      <div><span>Enthalpie <i>h</i></span><b id="d-h">–</b></div>
+      <div><span>Wassergehalt <i>x</i></span><b id="d-x">–</b></div>
+      <div><span>Absolut &#961;&#8348;</span><b id="d-rho">–</b></div>
+      <div><span>Dampfdruck <i>p</i>&#8348;</span><b id="d-pv">–</b></div>
+      <div><span>Sättigungsdruck <i>p</i>&#8347;</span><b id="d-ps">–</b></div>
+    </div>
+
+    <button class="btn-reset" onclick="resetSimple()">Zurücksetzen (20 °C / 50 %)</button>
+
+    <div class="mode-hint">
+      Zwei Werte sind <b>fix</b>, der dritte folgt daraus. Sobald du den
+      berechneten Wert selbst eintippst, wird er fix — und der am längsten
+      nicht angefasste Wert rechnet sich neu. Klick ins Diagramm setzt
+      <i>T</i> und Absolutfeuchte.
+    </div>
+  </div>
+
+  <!-- ══ PANEL: 5 PUNKTE ══════════════════════════════════════════════ -->
+  <div class="panel hidden" id="advanced-panel">
+    <h2>Eingabe</h2>
+    <div class="pressure-row">
+      <label>Luftdruck p [Pa]</label>
+      <input type="number" id="pressure" value="101325" step="100">
+    </div>
+    <div id="points-container"></div>
+    <button class="btn-calc" onclick="calculate()">Berechnen &amp; Zeichnen</button>
+    <div id="mode-hint" class="mode-hint">T-x: Temperatur auf X-Achse, Wassergehalt auf Y-Achse.</div>
+
+    <table class="legend-table">
+      <thead>
+        <tr>
+          <th>Pkt</th><th>T [°C]</th><th>φ [%]</th>
+          <th>x [g/kg]</th><th>h [kJ/kg]</th>
+        </tr>
+      </thead>
+      <tbody id="result-tbody"></tbody>
+    </table>
+    <p class="footnote">x: Wassergehalt &nbsp;|&nbsp; h: spez. Enthalpie<br>p_s nach Magnus (WMO 2018)</p>
+  </div>
+
+  <div class="chart-wrap">
+    <canvas id="mollier" width="760" height="590"></canvas>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTS ────────────────────────────────────────────────────────────────
+const COLORS = ['#E63946','#457B9D','#2A9D8F','#E9C46A','#9B5DE5'];
+const PNAMES = ['A','B','C','D','E'];
+const R_W  = 461.52;      // J/(kg·K)  Gaskonstante Wasserdampf
+const R0   = 2501;        // kJ/kg     Verdampfungsenthalpie bei 0 °C
+let currentView = 'einfach';   // 'einfach' | 'tx' | 'hx'
+let lastPts = [], lastP = 101325;
+
+// ── INPUT ROWS (5-Punkt-Ansicht) ─────────────────────────────────────────────
+const container = document.getElementById('points-container');
+const defaults = [{t:20,rh:50},{t:30,rh:70},{t:10,rh:90},{t:25,rh:40},{t:35,rh:60}];
+for(let i=0;i<5;i++){
+  container.innerHTML += `
+  <div class="point-row">
+    <div class="point-label">
+      <span class="color-swatch" style="background:${COLORS[i]}"></span>
+      Punkt ${PNAMES[i]}
+    </div>
+    <div class="input-grid">
+      <div class="input-group">
+        <label>T [°C]</label>
+        <input type="number" id="t${i}" value="${defaults[i].t}" step="0.1">
+      </div>
+      <div class="input-group">
+        <label>φ [%]</label>
+        <input type="number" id="rh${i}" value="${defaults[i].rh}" step="0.1" min="0" max="100">
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── PSYCHROMETRICS ───────────────────────────────────────────────────────────
+function satPressure(T) {                       // Magnus, Pa
+  return 611.2 * Math.exp((17.67 * T) / (T + 243.5));
+}
+function satPressureInv(ps) {                   // Pa → °C
+  const ln = Math.log(ps / 611.2);
+  return (243.5 * ln) / (17.67 - ln);
+}
+function calcX(T, phi, p) {                     // kg/kg
+  const pv = (phi / 100) * satPressure(T);
+  return 0.62198 * pv / (p - pv);
+}
+function calcH(T, x) {                          // kJ/kg
+  return 1.006 * T + x * (2501.0 + 1.860 * T);
+}
+function dewPoint(T, phi) {
+  return satPressureInv((phi/100) * satPressure(T));
+}
+
+// pv aus Wassergehalt x [kg/kg]
+function pvFromX(x, p) { return p * x / (0.62198 + x); }
+// x [kg/kg] aus pv
+function xFromPv(pv, p) { return 0.62198 * pv / (p - pv); }
+// pv aus Absolutfeuchte rho [g/m³] bei T [°C]
+function pvFromRho(rho, T) { return (rho/1000) * R_W * (T + 273.15); }
+// Absolutfeuchte [g/m³] aus pv bei T
+function rhoFromPv(pv, T) { return 1000 * pv / (R_W * (T + 273.15)); }
+
+// Feuchtkugeltemperatur: iterativ über die Psychrometergleichung
+function wetBulb(T, phi, p) {
+  const pv = (phi/100) * satPressure(T);
+  let lo = -60, hi = T;
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2;
+    // Psychrometerformel (Sprung/Ferrel), A = 6.5e-4 1/K
+    const pvMid = satPressure(mid) - 6.5e-4 * p * (T - mid);
+    if (pvMid > pv) hi = mid; else lo = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// EINFACHE ANSICHT — gekoppelte Felder T / Absolutfeuchte / rel. Feuchte
+//
+// "held" enthält die zwei zuletzt angefassten Felder (fix, index 0 = frischestes).
+// Das dritte Feld wird berechnet. Tippt man ins berechnete Feld, wird es fix und
+// das älteste bisher fixe Feld gibt seinen Wert frei.
+// ══════════════════════════════════════════════════════════════════════════════
+let held = ['T','AH'];                 // → RH wird berechnet
+const S = { T: 20, AH: 7.26, RH: 50 }; // AH in der aktuell gewählten Einheit
+let ahUnit = 'gkg';
+
+const elT  = document.getElementById('i-T');
+const elAH = document.getElementById('i-AH');
+const elRH = document.getElementById('i-RH');
+const elP  = document.getElementById('s-pressure');
+const elAHUnit = document.getElementById('ah-unit');
+
+function freeField() { return ['T','AH','RH'].find(f => !held.includes(f)); }
+
+function touch(field) {
+  if (held.includes(field)) {
+    held = [field, held.find(f => f !== field)];   // frischestes nach vorn
+  } else {
+    held = [field, held[0]];                       // ältestes fix gibt frei
+  }
+}
+
+// pv [Pa] aus zwei fixen Grössen bestimmen; liefert {T, pv} oder null
+function solveSimple(p) {
+  const free = freeField();
+
+  if (free === 'RH') {
+    // T + AH → pv
+    const T = S.T;
+    const pv = (ahUnit === 'gkg') ? pvFromX(S.AH/1000, p) : pvFromRho(S.AH, T);
+    return { T, pv };
+  }
+
+  if (free === 'AH') {
+    // T + RH → pv
+    const T = S.T;
+    return { T, pv: (S.RH/100) * satPressure(T) };
+  }
+
+  // free === 'T' : AH + RH → T  (numerisch, φ>0 vorausgesetzt)
+  if (S.RH <= 0) return null;
+
+  if (ahUnit === 'gkg') {
+    // pv folgt direkt aus x und p, unabhängig von T
+    const pv = pvFromX(S.AH/1000, p);
+    const ps = pv / (S.RH/100);
+    if (!(ps > 0) || !isFinite(ps)) return null;
+    return { T: satPressureInv(ps), pv };
+  }
+  // g/m³: pv hängt selbst von T ab → Bisektion über f(T) = φ/100·ps(T) − pv(T)
+  const f = T => (S.RH/100) * satPressure(T) - pvFromRho(S.AH, T);
+  let lo = -60, hi = 100;
+  if (f(lo) > 0 || f(hi) < 0) return null;
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    if (f(mid) < 0) lo = mid; else hi = mid;
+  }
+  const T = (lo + hi) / 2;
+  return { T, pv: pvFromRho(S.AH, T) };
+}
+
+function fmt(v, d) { return (Math.round(v * Math.pow(10,d)) / Math.pow(10,d)).toFixed(d); }
+
+function updateSimple() {
+  const p = parseFloat(elP.value) || 101325;
+  document.getElementById('main-sub').textContent =
+    `p = ${p.toLocaleString('de-CH')} Pa  |  Darstellung nach Mollier (1923)`;
+
+  const warnEl = document.getElementById('s-warn');
+  const sol = solveSimple(p);
+
+  if (!sol || !isFinite(sol.T) || !isFinite(sol.pv)) {
+    warnEl.textContent = 'Diese Kombination ergibt keinen gültigen Luftzustand — bitte einen der fixen Werte anpassen.';
+    warnEl.classList.remove('hidden');
+    markBadges();
+    return;
+  }
+
+  const T  = sol.T;
+  const pv = Math.max(sol.pv, 0);
+  const ps = satPressure(T);
+  const rh = 100 * pv / ps;
+  const x  = xFromPv(Math.min(pv, p * 0.999), p);      // kg/kg
+  const rho = rhoFromPv(pv, T);
+  const h  = calcH(T, x);
+
+  // berechnetes Feld zurückschreiben (fixe Felder bleiben unangetastet)
+  const free = freeField();
+  if (free === 'T')  { S.T  = T;  elT.value  = fmt(T, 2); }
+  if (free === 'RH') { S.RH = rh; elRH.value = fmt(rh, 1); }
+  if (free === 'AH') { S.AH = (ahUnit === 'gkg') ? x*1000 : rho; elAH.value = fmt(S.AH, 2); }
+
+  // Warnungen
+  let w = '';
+  if (rh > 100.05) {
+    w = `Übersättigt: φ = ${fmt(rh,1)} % > 100 %. Die Luft kann bei ${fmt(T,1)} °C `
+      + `nur ${fmt(calcX(T,100,p)*1000,2)} g/kg aufnehmen — der Rest fällt als Nebel/Kondensat aus.`;
+  } else if (rh < 0) {
+    w = 'Negativer Dampfdruck — Eingabe prüfen.';
+  } else if (T < -40 || T > 80) {
+    w = `Temperatur ${fmt(T,1)} °C liegt ausserhalb des üblichen Gültigkeitsbereichs der Magnus-Formel.`;
+  }
+  warnEl.textContent = w;
+  warnEl.classList.toggle('hidden', w === '');
+
+  // Abgeleitete Werte
+  const rhClamped = Math.min(Math.max(rh, 0.001), 100);
+  document.getElementById('d-td').textContent  = (pv < 1)
+    ? '–'                                    // praktisch trockene Luft: kein sinnvoller Taupunkt
+    : fmt(satPressureInv(pv), 2) + ' °C';
+  document.getElementById('d-tw').textContent  = fmt(wetBulb(T, rhClamped, p), 2) + ' °C';
+  document.getElementById('d-h').textContent   = fmt(h, 2) + ' kJ/kg';
+  document.getElementById('d-x').textContent   = fmt(x*1000, 3) + ' g/kg';
+  document.getElementById('d-rho').textContent = fmt(rho, 3) + ' g/m³';
+  document.getElementById('d-pv').textContent  = fmt(pv, 1) + ' Pa';
+  document.getElementById('d-ps').textContent  = fmt(ps, 1) + ' Pa';
+
+  markBadges();
+
+  // Punkt zeichnen
+  lastP = p;
+  lastPts = [{ T, rh, x, h, color: COLORS[0], name: 'P' }];
+  if (currentView === 'einfach') drawTX(lastPts, p, false);
+}
+
+function markBadges() {
+  ['T','AH','RH'].forEach(f => {
+    const isHeld = held.includes(f);
+    const box = document.getElementById('f-' + f);
+    const bad = document.getElementById('b-' + f);
+    box.classList.toggle('held', isHeld);
+    box.classList.toggle('computed', !isHeld);
+    bad.textContent = isHeld ? 'fix' : 'berechnet';
+    bad.className = 'badge ' + (isHeld ? 'fix' : 'calc');
+  });
+}
+
+function bindSimple(el, field) {
+  el.addEventListener('input', () => {
+    const v = parseFloat(el.value);
+    if (!isFinite(v)) return;
+    S[field] = v;
+    touch(field);
+    updateSimple();
+  });
+}
+bindSimple(elT,  'T');
+bindSimple(elAH, 'AH');
+bindSimple(elRH, 'RH');
+elP.addEventListener('input', updateSimple);
+
+// Einheitenwechsel: physikalischer Zustand bleibt, nur die Zahl wird umgerechnet
+elAHUnit.addEventListener('change', () => {
+  const p = parseFloat(elP.value) || 101325;
+  const prev = ahUnit;
+  ahUnit = elAHUnit.value;
+  if (held.includes('AH') && prev !== ahUnit) {
+    const T = S.T;
+    const pv = (prev === 'gkg') ? pvFromX(S.AH/1000, p) : pvFromRho(S.AH, T);
+    S.AH = (ahUnit === 'gkg') ? xFromPv(pv, p)*1000 : rhoFromPv(pv, T);
+    elAH.value = fmt(S.AH, 2);
+  }
+  updateSimple();
+});
+
+function resetSimple() {
+  held = ['T','AH'];
+  ahUnit = 'gkg'; elAHUnit.value = 'gkg';
+  elP.value = 101325;
+  S.T = 20; S.RH = 50;
+  S.AH = calcX(20, 50, 101325) * 1000;
+  elT.value = '20'; elAH.value = fmt(S.AH, 2);
+  updateSimple();
+}
+
+// Klick ins Diagramm → T und Absolutfeuchte setzen (beide fix), φ folgt
+document.getElementById('mollier').addEventListener('click', (ev) => {
+  if (currentView !== 'einfach') return;
+  const cv = ev.currentTarget;
+  const r = cv.getBoundingClientRect();
+  const px = (ev.clientX - r.left) * (cv.width  / r.width);
+  const py = (ev.clientY - r.top)  * (cv.height / r.height);
+
+  const T_MIN=-10, T_MAX=50, X_MIN=0, X_MAX=30;
+  const ml=58, mr=40, mt=30, mb=50;
+  const pw=cv.width-ml-mr, ph=cv.height-mt-mb;
+  if (px < ml || px > ml+pw || py < mt || py > mt+ph) return;
+
+  const p = parseFloat(elP.value) || 101325;
+  const T   = T_MIN + (px-ml)/pw * (T_MAX-T_MIN);
+  const xg  = X_MIN + (mt+ph-py)/ph * (X_MAX-X_MIN);
+
+  S.T = Math.round(T*10)/10;
+  elT.value = fmt(S.T, 1);
+  const pv = pvFromX(xg/1000, p);
+  S.AH = (ahUnit === 'gkg') ? xg : rhoFromPv(pv, S.T);
+  elAH.value = fmt(S.AH, 2);
+
+  held = ['AH','T'];          // beide fix → φ wird berechnet
+  updateSimple();
+});
+
+// ── VIEW SWITCH ──────────────────────────────────────────────────────────────
+function setView(v) {
+  currentView = v;
+  ['einfach','tx','hx'].forEach(k => {
+    document.getElementById('btn-' + k).className = (v === k) ? 'active' : '';
+  });
+  document.getElementById('simple-panel').classList.toggle('hidden', v !== 'einfach');
+  document.getElementById('advanced-panel').classList.toggle('hidden', v === 'einfach');
+
+  const hint = document.getElementById('mode-hint');
+  if (v === 'einfach') {
+    document.getElementById('main-title').textContent = 'Feuchte Luft — ein Punkt';
+    updateSimple();
+    return;
+  }
+  if (v === 'tx') {
+    document.getElementById('main-title').textContent = 'Mollier h-x Diagramm — Feuchte Luft';
+    hint.textContent = 'T-x: Temperatur auf X-Achse, Wassergehalt auf Y-Achse.';
+  } else {
+    document.getElementById('main-title').textContent = 'h-x Diagramm nach Mollier — Feuchte Luft';
+    hint.textContent = 'h-x nach Mollier: schiefwinkliges System η = h − 2501·x. Isotherme 0 °C horizontal, Isenthalpen fallen schräg.';
+  }
+  calculate();
+}
+
+// ── CALCULATE (5-Punkt) ──────────────────────────────────────────────────────
+function calculate() {
+  const p = parseFloat(document.getElementById('pressure').value) || 101325;
+  document.getElementById('main-sub').textContent =
+    `p = ${p.toLocaleString('de-CH')} Pa  |  Darstellung nach Mollier (1923)`;
+  const pts = [];
+  for(let i=0;i<5;i++){
+    const T  = parseFloat(document.getElementById(`t${i}`).value);
+    const rh = parseFloat(document.getElementById(`rh${i}`).value);
+    const x  = calcX(T, rh, p);
+    const h  = calcH(T, x);
+    pts.push({T, rh, x, h, color:COLORS[i], name:PNAMES[i]});
+  }
+  lastPts = pts; lastP = p;
+
+  const tbody = document.getElementById('result-tbody');
+  tbody.innerHTML = '';
+  pts.forEach(pt => {
+    tbody.innerHTML += `<tr>
+      <td class="lbl" style="color:${pt.color}">${pt.name}</td>
+      <td>${pt.T.toFixed(1)}</td>
+      <td>${pt.rh.toFixed(1)}</td>
+      <td>${(pt.x*1000).toFixed(2)}</td>
+      <td>${pt.h.toFixed(2)}</td>
+    </tr>`;
+  });
+
+  if(currentView === 'tx') drawTX(pts, p, true);
+  else if(currentView === 'hx') drawHX(pts, p);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// T-x DIAGRAM
+// ════════════════════════════════════════════════════════════════════════════
+function drawTX(userPts, p, showBoxes) {
+  const canvas = document.getElementById('mollier');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const T_MIN=-10, T_MAX=50, X_MIN=0, X_MAX=30;
+  const ml=58, mr=40, mt=30, mb=50;
+  const pw=W-ml-mr, ph=H-mt-mb;
+
+  function cx(T)    { return ml + (T-T_MIN)/(T_MAX-T_MIN)*pw; }
+  function cy(xGkg) { return mt + ph - (xGkg-X_MIN)/(X_MAX-X_MIN)*ph; }
+
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.lineWidth=0.4; ctx.strokeStyle='#ccc'; ctx.setLineDash([3,3]);
+  for(let T=T_MIN;T<=T_MAX;T+=5){ ctx.beginPath(); ctx.moveTo(cx(T),mt); ctx.lineTo(cx(T),mt+ph); ctx.stroke(); }
+  for(let x=X_MIN;x<=X_MAX;x+=2){ ctx.beginPath(); ctx.moveTo(ml,cy(x)); ctx.lineTo(ml+pw,cy(x)); ctx.stroke(); }
+  ctx.setLineDash([]);
+
+  // Isenthalpic lines
+  ctx.strokeStyle='#b0c4d8'; ctx.lineWidth=0.6; ctx.setLineDash([6,4]);
+  for(let h=-10;h<=120;h+=10){
+    ctx.beginPath(); let s=false;
+    for(let T=T_MIN;T<=T_MAX;T+=0.5){
+      const xg=((h-1.006*T)/(2501+1.86*T))*1000;
+      if(xg<X_MIN-0.5||xg>X_MAX+0.5){s=false;continue;}
+      const xi=Math.max(X_MIN,Math.min(X_MAX,xg));
+      s ? ctx.lineTo(cx(T),cy(xi)) : (ctx.moveTo(cx(T),cy(xi)), s=true);
+    }
+    ctx.stroke();
+    const xl=((h-1.006*T_MAX)/(2501+1.86*T_MAX))*1000;
+    if(xl>=X_MIN&&xl<=X_MAX){
+      ctx.save(); ctx.setLineDash([]); ctx.fillStyle='#7a9ab0';
+      ctx.font='9px Arial'; ctx.textAlign='left';
+      ctx.fillText(`${h}`,cx(T_MAX)+3,cy(xl)+3); ctx.restore();
+    }
+  }
+  ctx.setLineDash([]);
+
+  // φ curves
+  [10,20,30,40,50,60,70,80,90,100].forEach(phi=>{
+    const sat=phi===100;
+    ctx.strokeStyle=sat?'#1a1a1a':'#9dbfcf'; ctx.lineWidth=sat?1.8:0.8;
+    ctx.beginPath(); let s=false;
+    for(let T=T_MIN;T<=T_MAX;T+=0.2){
+      const x=calcX(T,phi,p)*1000;
+      if(x>X_MAX+0.1){s=false;continue;}
+      const xc=Math.min(x,X_MAX);
+      s ? ctx.lineTo(cx(T),cy(xc)) : (ctx.moveTo(cx(T),cy(xc)), s=true);
+    }
+    ctx.stroke();
+    const xl=calcX(T_MAX-8,phi,p)*1000;
+    if(xl>=X_MIN&&xl<=X_MAX){
+      ctx.save(); ctx.fillStyle=sat?'#1a1a1a':'#5a8fa0';
+      ctx.font=sat?'bold 9px Arial':'8.5px Arial'; ctx.textAlign='left';
+      ctx.fillText(`${phi}%`,cx(T_MAX-8)+2,cy(xl)-2); ctx.restore();
+    }
+  });
+
+  // Axes + ticks
+  ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(ml,mt+ph); ctx.lineTo(ml+pw,mt+ph); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ml,mt); ctx.lineTo(ml,mt+ph); ctx.stroke();
+
+  ctx.fillStyle='#1a1a1a'; ctx.font='11px Arial'; ctx.textAlign='center';
+  for(let T=T_MIN;T<=T_MAX;T+=5){
+    ctx.beginPath(); ctx.moveTo(cx(T),mt+ph); ctx.lineTo(cx(T),mt+ph+5); ctx.stroke();
+    ctx.fillText(`${T}`,cx(T),mt+ph+16);
+  }
+  ctx.textAlign='right';
+  for(let x=X_MIN;x<=X_MAX;x+=2){
+    ctx.beginPath(); ctx.moveTo(ml,cy(x)); ctx.lineTo(ml-5,cy(x)); ctx.stroke();
+    ctx.fillText(`${x}`,ml-8,cy(x)+4);
+  }
+
+  ctx.font='italic 12px Times New Roman'; ctx.textAlign='center'; ctx.fillStyle='#1a1a1a';
+  ctx.fillText('Temperatur T  [°C]',ml+pw/2,H-10);
+  ctx.save(); ctx.translate(13,mt+ph/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Wassergehalt x  [g/kgₐ]',0,0); ctx.restore();
+
+  ctx.save(); ctx.fillStyle='#7a9ab0'; ctx.font='italic 9px Arial';
+  ctx.textAlign='left'; ctx.fillText('h [kJ/kg] →',ml+pw+4,mt+8); ctx.restore();
+
+  // User points
+  drawPoints(ctx, userPts, (pt)=>({px:cx(pt.T), py:cy(pt.x*1000)}),
+    ml, mt, pw, ph, true, showBoxes);
+
+  ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=1.5;
+  ctx.strokeRect(ml,mt,pw,ph);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// h-x DIAGRAM nach Mollier — korrektes schiefwinkliges Koordinatensystem
+//
+// Ordinate (vertikal):  η = h − r₀·x   mit r₀ = 2501 kJ/kg
+// Abszisse (horizontal): x [g/kg]
+//
+// Konsequenzen (Definition des Mollier-Diagramms):
+//   • Isotherme T = 0 °C verläuft exakt horizontal:
+//       h(0,x) = 2501·x  →  η = 0 für alle x
+//   • Isenthalpen (h = const) fallen schräg nach rechts:
+//       η = h − 2501·x   (Steigung −2501 kJ/kg pro kg/kg)
+//   • Isotherme T > 0 steigen leicht an (Steigung 1.86·T),
+//     sie fächern mit zunehmender Temperatur auf
+//   • Isotherme werden an der Sättigungslinie (φ=100 %) abgeschnitten;
+//     darunter liegt das Nebelgebiet
+// ════════════════════════════════════════════════════════════════════════════
+function drawHX(userPts, p) {
+  const canvas = document.getElementById('mollier');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const X_MIN=0, X_MAX=30;         // g/kg
+  const E_MIN=-15, E_MAX=55;       // η = h − r0·x  [kJ/kg]
+  const T_LO=-10, T_HI=50;
+
+  const ml=68, mr=46, mt=34, mb=58;
+  const pw=W-ml-mr, ph=H-mt-mb;
+
+  function eta(xGkg, h) { return h - R0*(xGkg/1000); }
+  function toC(xGkg, h) {
+    const xn = (xGkg - X_MIN) / (X_MAX - X_MIN);
+    const en = (eta(xGkg,h) - E_MIN) / (E_MAX - E_MIN);
+    return { x: ml + xn*pw, y: mt + ph - en*ph };
+  }
+
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+
+  // ── Clip auf Diagrammfläche für alle Linien
+  ctx.save();
+  ctx.beginPath(); ctx.rect(ml, mt, pw, ph); ctx.clip();
+
+  // ── Nebelgebiet (unterhalb φ = 100 %) leicht schattieren
+  ctx.beginPath();
+  let firstPt = true;
+  for(let T=T_HI; T>=T_LO; T-=0.25){
+    const xs = calcX(T,100,p)*1000;
+    const hs = calcH(T, calcX(T,100,p));
+    const c = toC(Math.min(xs,X_MAX), hs);
+    if(firstPt){ ctx.moveTo(c.x,c.y); firstPt=false; } else ctx.lineTo(c.x,c.y);
+  }
+  ctx.lineTo(ml, mt+ph); ctx.lineTo(ml+pw, mt+ph);
+  ctx.closePath();
+  ctx.fillStyle='rgba(160,180,200,0.13)';
+  ctx.fill();
+
+  // ── Isohumiden (x = const): senkrechte Linien
+  ctx.strokeStyle='#d0d0d0'; ctx.lineWidth=0.4; ctx.setLineDash([3,3]);
+  for(let x=X_MIN+2; x<=X_MAX; x+=2){
+    ctx.beginPath();
+    ctx.moveTo(toC(x,0).x, mt); ctx.lineTo(toC(x,0).x, mt+ph);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // ── Isenthalpen (h = const): fallende Geraden  η = h − 2501·x
+  ctx.strokeStyle='#8fb0c8'; ctx.lineWidth=0.6;
+  for(let h=-10; h<=140; h+=10){
+    const p1=toC(X_MIN,h), p2=toC(X_MAX,h);
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+  }
+
+  // ── Isotherme: Geraden, an Sättigungslinie abgeschnitten
+  const isoT=[-10,-5,0,5,10,15,20,25,30,35,40,45,50];
+  isoT.forEach(T=>{
+    const xSat = calcX(T,100,p)*1000;
+    const xEnd = Math.min(xSat, X_MAX);
+    const p1=toC(0, calcH(T,0));
+    const p2=toC(xEnd, calcH(T, xEnd/1000));
+    const main = T%10===0;
+    ctx.strokeStyle = main ? '#a0522d' : '#d2956a';
+    ctx.lineWidth   = main ? 1.1 : 0.55;
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+  });
+
+  // ── φ-Kurven
+  [10,20,30,40,50,60,70,80,90,100].forEach(phi=>{
+    const sat=phi===100;
+    ctx.strokeStyle=sat?'#1a1a1a':'#4a8faf';
+    ctx.lineWidth=sat?2:0.9;
+    ctx.beginPath(); let s=false;
+    for(let T=T_LO;T<=T_HI+5;T+=0.2){
+      const x=calcX(T,phi,p)*1000;
+      if(x>X_MAX+1){ break; }
+      const h=calcH(T,x/1000);
+      const c=toC(x,h);
+      s ? ctx.lineTo(c.x,c.y) : (ctx.moveTo(c.x,c.y), s=true);
+    }
+    ctx.stroke();
+  });
+
+  ctx.restore();   // Ende Clip
+
+  // ── Beschriftung Isotherme (am linken Rand, x=0)
+  isoT.forEach(T=>{
+    if(T%10!==0) return;
+    const c=toC(0, calcH(T,0));
+    if(c.y<mt-2||c.y>mt+ph+2) return;
+    ctx.fillStyle='#7a3010'; ctx.font='bold 9px Arial'; ctx.textAlign='right';
+    ctx.fillText(`${T}°`, ml-7, c.y+3);
+  });
+
+  // ── Beschriftung Isenthalpen (Eintrittspunkt oben bzw. links)
+  ctx.fillStyle='#5a86a0'; ctx.font='8.5px Arial';
+  for(let h=-10; h<=140; h+=10){
+    // Schnitt mit Oberkante: eta=E_MAX → x = (h−E_MAX)/R0 ·1000
+    const xTop = (h - E_MAX)/R0*1000;
+    if(xTop>=X_MIN && xTop<=X_MAX-1){
+      const c=toC(xTop,h);
+      ctx.textAlign='center';
+      ctx.fillText(`${h}`, c.x+8, mt-4);
+    } else if(eta(X_MAX,h)>=E_MIN && eta(X_MAX,h)<=E_MAX){
+      // Schnitt mit rechter Kante
+      const c=toC(X_MAX,h);
+      ctx.textAlign='left';
+      ctx.fillText(`${h}`, ml+pw+4, c.y+3);
+    }
+  }
+  ctx.save();
+  ctx.fillStyle='#5a86a0'; ctx.font='italic 9px Arial'; ctx.textAlign='left';
+  ctx.fillText('h [kJ/kg]', ml+pw+4, mt-4);
+  ctx.restore();
+
+  // ── φ-Beschriftung (bei T ≈ 32 °C entlang jeder Kurve)
+  [10,20,30,40,50,60,70,80,90,100].forEach(phi=>{
+    const sat=phi===100;
+    const T_lab=32;
+    const x_lab=calcX(T_lab,phi,p)*1000;
+    if(x_lab<X_MIN||x_lab>X_MAX) return;
+    const h_lab=calcH(T_lab, x_lab/1000);
+    const c=toC(x_lab,h_lab);
+    if(c.y<mt+6||c.y>mt+ph-4) return;
+    ctx.fillStyle=sat?'#1a1a1a':'#2a6a8a';
+    ctx.font=sat?'bold 9px Arial':'8.5px Arial';
+    ctx.textAlign='center';
+    ctx.fillText(`${phi}%`,c.x,c.y-4);
+  });
+
+  // ── Achsen
+  ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=1.5;
+  ctx.strokeRect(ml,mt,pw,ph);
+
+  // x-Ticks unten
+  ctx.fillStyle='#1a1a1a'; ctx.font='11px Arial'; ctx.textAlign='center';
+  for(let x=X_MIN;x<=X_MAX;x+=2){
+    const cxp = ml + (x-X_MIN)/(X_MAX-X_MIN)*pw;
+    ctx.beginPath(); ctx.moveTo(cxp,mt+ph); ctx.lineTo(cxp,mt+ph+5); ctx.stroke();
+    ctx.fillText(`${x}`,cxp,mt+ph+16);
+  }
+
+  // η-Achse links: da bei x=0 gilt η = h, trägt die linke Achse direkt die h-Skala
+  ctx.textAlign='right';
+  for(let e=E_MIN+5;e<=E_MAX;e+=10){
+    const cyp = mt + ph - (e-E_MIN)/(E_MAX-E_MIN)*ph;
+    ctx.beginPath(); ctx.moveTo(ml,cyp); ctx.lineTo(ml-5,cyp); ctx.stroke();
+    ctx.fillText(`${e}`,ml-26,cyp+4);
+  }
+
+  // ── Achsbeschriftungen
+  ctx.font='italic 12px Times New Roman'; ctx.fillStyle='#1a1a1a'; ctx.textAlign='center';
+  ctx.fillText('Wassergehalt x  [g/kgₐ]', ml+pw/2, H-12);
+  ctx.save();
+  ctx.translate(16, mt+ph/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('h  [kJ/kgₐ]  (Skala bei x = 0)',0,0);
+  ctx.restore();
+
+  // Hinweis Nebelgebiet
+  ctx.save();
+  ctx.fillStyle='#8095a8'; ctx.font='italic 9px Arial'; ctx.textAlign='left';
+  ctx.fillText('Nebelgebiet (übersättigt)', ml+8, mt+ph-10);
+  ctx.restore();
+
+  // ── User points
+  drawPoints(ctx, userPts,
+    (pt) => { const c=toC(pt.x*1000, pt.h); return {px:c.x, py:c.y}; },
+    ml, mt, pw, ph, false, true);
+}
+
+// ── SHARED POINT RENDERING (mit Kollisionsvermeidung + Verbindungslinien) ───
+function drawPoints(ctx, pts, posF, ml, mt, pw, ph, droplines, showBoxes) {
+  const R = 7, BW = 128, BH = 46, GAP = 6;
+  const W = ctx.canvas.width, H = ctx.canvas.height;
+
+  // 1) Punktpositionen berechnen, ausserhalb liegende verwerfen
+  const items = [];
+  pts.forEach(pt => {
+    const {px, py} = posF(pt);
+    if(px < ml-10 || px > ml+pw+10 || py < mt-10 || py > mt+ph+10) return;
+    items.push({pt, px, py});
+  });
+
+  // 2) Hilfslinien + Punkte zeichnen
+  items.forEach(it => {
+    if(droplines){
+      ctx.save(); ctx.setLineDash([4,3]);
+      ctx.strokeStyle = it.pt.color + '88'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(it.px,it.py); ctx.lineTo(it.px,mt+ph); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(it.px,it.py); ctx.lineTo(ml,it.py);    ctx.stroke();
+      ctx.setLineDash([]); ctx.restore();
+    }
+  });
+
+  if(showBoxes){
+    // 3) Boxen-Layout: gewünschte Position rechts neben Punkt,
+    //    dann vertikale Überlappungen iterativ auflösen
+    items.forEach(it => {
+      const OFFSET = 200;   // Abstand Box <-> Punkt
+      it.bx = it.px + OFFSET;
+      it.by = it.py - BH/2;
+      // Falls rechts kein Platz: links vom Punkt
+      if(it.bx + BW > W - 4) it.bx = it.px - BW - OFFSET;
+      // Falls auch links kein Platz: so weit rechts wie moeglich
+      if(it.bx < 4) it.bx = Math.min(it.px + OFFSET, W - BW - 4);
+      // Vertikal in Canvas halten
+      it.by = Math.max(4, Math.min(H - BH - 4, it.by));
+    });
+
+    // Nur Boxen gegeneinander prüfen, die sich horizontal überschneiden
+    items.sort((a,b) => a.by - b.by);
+    for(let iter=0; iter<60; iter++){
+      let moved = false;
+      for(let i=0; i<items.length; i++){
+        for(let j=i+1; j<items.length; j++){
+          const A=items[i], B=items[j];
+          const xOverlap = A.bx < B.bx + BW && B.bx < A.bx + BW;
+          if(!xOverlap) continue;
+          const need = (A.by + BH + GAP) - B.by;
+          if(need > 0){
+            // auseinanderschieben, je zur Hälfte
+            A.by -= need/2; B.by += need/2;
+            A.by = Math.max(4, A.by);
+            B.by = Math.min(H - BH - 4, B.by);
+            moved = true;
+          }
+        }
+      }
+      items.sort((a,b) => a.by - b.by);
+      if(!moved) break;
+    }
+
+    // 4) Verbindungslinien Box -> Punkt (unter den Boxen zeichnen)
+    items.forEach(it => {
+      // Ankerpunkt: Mitte der dem Punkt zugewandten Boxkante
+      const boxCx = it.bx + BW/2;
+      const ax = (it.px < boxCx) ? it.bx : it.bx + BW;
+      const ay = it.by + BH/2;
+      ctx.save();
+      ctx.strokeStyle = it.pt.color;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2,2]);
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(it.px, it.py); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    });
+  }
+
+  // 5) Punkte zeichnen (über den Linien)
+  items.forEach(it => {
+    ctx.beginPath(); ctx.arc(it.px, it.py, R, 0, 2*Math.PI);
+    ctx.fillStyle = it.pt.color; ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(it.pt.name, it.px, it.py);
+    ctx.textBaseline = 'alphabetic';
+  });
+
+  if(!showBoxes) return;
+
+  // 6) Boxen zeichnen (zuoberst)
+  items.forEach(it => {
+    const pt = it.pt;
+    const lines = [
+      `${pt.T.toFixed(1)} °C  φ=${pt.rh.toFixed(1)} %`,
+      `x = ${(pt.x*1000).toFixed(2)} g/kg`,
+      `h = ${pt.h.toFixed(1)} kJ/kg`
+    ];
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.strokeStyle = pt.color; ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(it.bx, it.by, BW, BH, 3) : ctx.rect(it.bx, it.by, BW, BH);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = pt.color; ctx.font = 'bold 8.5px Arial'; ctx.textAlign = 'left';
+    ctx.fillText(`Punkt ${pt.name}`, it.bx+5, it.by+12);
+    ctx.fillStyle = '#222'; ctx.font = '8px Arial';
+    lines.forEach((l,i) => ctx.fillText(l, it.bx+5, it.by+23+i*9.5));
+  });
+}
+
+window.onload = function() {
+  resetSimple();
+  setView('einfach');
+};
+</script>
+</body>
+</html>
